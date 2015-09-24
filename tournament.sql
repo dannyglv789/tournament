@@ -8,13 +8,11 @@
 -- CREATE TABLE 
 
 /* creating DATABASE and establishing connection */
-
 DROP DATABASE tournament;
 CREATE DATABASE tournament;
 \c tournament;
 
 /* Table Schema */
-
 CREATE TABLE players (
 	player_id serial PRIMARY KEY,
 	player_name text
@@ -26,6 +24,7 @@ CREATE TABLE matches (
 	loser serial references players(player_id)
 );
 
+/* Create Views for standings*/
 CREATE VIEW player_wins AS SELECT players.player_id, players.player_name, COUNT(matches.winner) as num_wins from
                players left join matches on players.player_id = matches.winner 
                GROUP BY player_id ORDER BY num_wins desc;
