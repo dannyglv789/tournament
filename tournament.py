@@ -14,7 +14,8 @@ def connect():
 def deleteMatches():
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
-    c.execute("DELETE FROM players")
+    c.execute("DELETE FROM matches")
+    db.commit()
     db.close()
     """Remove all the match records from the database."""
 
@@ -43,7 +44,8 @@ def registerPlayer(name):
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
     our_clean_content = bleach.clean(name, strip=True)
-    c.execute("INSERT into players(player_name) values (%s)", (our_clean_content,))
+    c.execute("INSERT into players(player_name) \
+               values (%s)", (our_clean_content,))
     db.commit()
     db.close()
     """Adds a player to the tournament database.
@@ -58,22 +60,9 @@ def registerPlayer(name):
 
 def playerStandings():
     db = psycopg2.connect("dbname=tournament")
-    c = db.cursor()
-    '''c.execute("CREATE VIEW player_wins AS SELECT players.player_id, \
-               players.player_name, COUNT(matches.winner) as num_wins from \
-               players left join matches on players.player_id = matches.winner \
-               GROUP BY player_id ORDER BY num_wins desc")
-    
-    c.execute("CREATE VIEW total_matches AS SELECT players.player_id, \
-               COUNT(matches.match_id) AS matches_played \
-               FROM players join matches on players.player_id \
-               = matches.winner or players.player_id = matches.loser GROUP BY player_id")
-
-    c.execute("CREATE VIEW our_standings AS SELECT player_wins.player_id, player_name, num_wins, coalesce(total_matches.matches_played,0) AS matches \
-               FROM player_wins left join total_matches on player_wins.player_id = total_matches.player_id ORDER BY num_wins desc") '''
-    
+    c = db.cursor() 
     c.execute("SELECT * FROM our_standings")
-    db.commit()
+    # db.commit()
     results = c.fetchall()
     print "PLAYER ID - PLAYER NAME - WINS - MATCHES"
     for i in results:
@@ -97,11 +86,10 @@ def playerStandings():
 def reportMatch(winner, loser):
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
-    c.execute("INSERT into matches(winner, loser) VALUES(%s, %s)", (winner, loser))
+    c.execute("INSERT into matches(winner, loser) \
+               VALUES(%s, %s)", (winner, loser))
     db.commit()
-    # results = c.fetchall()
     db.close()
-    # return results
     """Records the outcome of a single match between two players.
 
     Args:
@@ -112,15 +100,13 @@ def reportMatch(winner, loser):
  
 def swissPairings():
     standings = playerStandings()
-    pairs = []
-    for row in standings:
-        pair = (standings[0][0],standings[0][1],standings[1][0],standings[1][1])
-        pair_2 = (standings[2][0],standings[2][1],standings[3][0],standings[3][1])
-    print "PAIRINGS" 
-    pairs.append(pair)
-    pairs.append(pair_2)
-    print pairs
-    return pairs
+    # List comprehension to complete pairings formed from solution shared on project forum
+    pairings=[(standings[i]+standings[i-1]) for i in range(1,len(standings),2)]
+    # List containing id1, name1, id2, name2
+    final_pairings = [(x[0],x[1],x[4],x[5]) for x in pairings]
+    print "PAIRINGS"
+    print final_pairings
+    return final_pairings
     
     """Returns a list of pairs of players for the next round of a match.
   
