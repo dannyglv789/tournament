@@ -56,7 +56,7 @@ def registerPlayer(name):
     db.close()
    
 def playerStandings():
-     """Returns a list of the players and their win records, sorted by wins.
+    """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
@@ -109,10 +109,11 @@ def swissPairings():
         name2: the second player's name
     """
     standings = playerStandings()
-    # List comprehension to complete pairings formed from solution shared on project forum
-    pairings=[(standings[i]+standings[i-1]) for i in range(1,len(standings),2)]
-    # List containing id1, name1, id2, name2
-    final_pairings = [(x[0],x[1],x[4],x[5]) for x in pairings]
+    if len(standings) % 2 == 0:
+        # List comprehension to complete pairings formed from solution shared on project forum
+        pairings=[(standings[i]+standings[i-1]) for i in range(1,len(standings),2)]
+        # List containing id1, name1, id2, name2
+        final_pairings = [(x[0],x[1],x[4],x[5]) for x in pairings]
     print "PAIRINGS"
     print final_pairings
     return final_pairings
