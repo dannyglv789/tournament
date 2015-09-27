@@ -12,24 +12,24 @@ def connect():
 
 
 def deleteMatches():
+    """Remove all the match records from the database."""
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
     c.execute("DELETE FROM matches")
     db.commit()
     db.close()
-    """Remove all the match records from the database."""
 
 
 def deletePlayers():
+    """Remove all the player records from the database."""
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
     c.execute("DELETE FROM players")
     db.commit()
     db.close()
-    """Remove all the player records from the database."""
-
-
+    
 def countPlayers():
+    """Returns the number of players currently registered."""
     db = psycopg2.connect("dbname=tournament")
     c = db.cursor()
     c.execute("SELECT COUNT(player_id) FROM players")
@@ -37,17 +37,8 @@ def countPlayers():
     print results
     db.close()
     return results[0]
-    """Returns the number of players currently registered."""
-
 
 def registerPlayer(name):
-    db = psycopg2.connect("dbname=tournament")
-    c = db.cursor()
-    our_clean_content = bleach.clean(name, strip=True)
-    c.execute("INSERT into players(player_name) \
-               values (%s)", (our_clean_content,))
-    db.commit()
-    db.close()
     """Adds a player to the tournament database.
   
     The database assigns a unique serial id number for the player.  (This
@@ -56,20 +47,16 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-
-
-def playerStandings():
     db = psycopg2.connect("dbname=tournament")
-    c = db.cursor() 
-    c.execute("SELECT * FROM our_standings")
-    # db.commit()
-    results = c.fetchall()
-    print "PLAYER ID - PLAYER NAME - WINS - MATCHES"
-    for i in results:
-        print i
+    c = db.cursor()
+    our_clean_content = bleach.clean(name, strip=True)
+    c.execute("INSERT into players(player_name) \
+               values (%s)", (our_clean_content,))
+    db.commit()
     db.close()
-    return results
-    """Returns a list of the players and their win records, sorted by wins.
+   
+def playerStandings():
+     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
@@ -81,33 +68,32 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-
-
-def reportMatch(winner, loser):
     db = psycopg2.connect("dbname=tournament")
-    c = db.cursor()
-    c.execute("INSERT into matches(winner, loser) \
-               VALUES(%s, %s)", (winner, loser))
-    db.commit()
+    c = db.cursor() 
+    c.execute("SELECT * FROM our_standings")
+    # db.commit()
+    results = c.fetchall()
+    print "PLAYER ID - PLAYER NAME - WINS - MATCHES"
+    for i in results:
+        print i
     db.close()
+    return results
+   
+def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
 
     Args:
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
- 
+    db = psycopg2.connect("dbname=tournament")
+    c = db.cursor()
+    c.execute("INSERT into matches(winner, loser) \
+               VALUES(%s, %s)", (winner, loser))
+    db.commit()
+    db.close()
+   
 def swissPairings():
-    standings = playerStandings()
-    # List comprehension to complete pairings formed from solution shared on project forum
-    pairings=[(standings[i]+standings[i-1]) for i in range(1,len(standings),2)]
-    # List containing id1, name1, id2, name2
-    final_pairings = [(x[0],x[1],x[4],x[5]) for x in pairings]
-    print "PAIRINGS"
-    print final_pairings
-    return final_pairings
-    
     """Returns a list of pairs of players for the next round of a match.
   
     Assuming that there are an even number of players registered, each player
@@ -122,5 +108,13 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    standings = playerStandings()
+    # List comprehension to complete pairings formed from solution shared on project forum
+    pairings=[(standings[i]+standings[i-1]) for i in range(1,len(standings),2)]
+    # List containing id1, name1, id2, name2
+    final_pairings = [(x[0],x[1],x[4],x[5]) for x in pairings]
+    print "PAIRINGS"
+    print final_pairings
+    return final_pairings
 
 
