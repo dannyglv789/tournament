@@ -13,9 +13,3 @@ In order to run please
 3. Once the db has been imported exit psql 
 4. from the command line run tournament_test.py uncommenting bottom function
 calls to perform functions _one by one_. 
-
-psql commands:
-* psql - enter psql
-* \c - connect
-* \i - import
-* \q - quit
